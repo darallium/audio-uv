@@ -28,5 +28,6 @@ set USE_CUFILE=1
 
 call .\.venv\Scripts\activate.bat
 
+;uv run setup.py develop
 ;uv run setup.py install --single-version-externally-managed --record=record.txt
 uv run setup.py install --record=record.txt

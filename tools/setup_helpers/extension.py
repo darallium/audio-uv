@@ -36,13 +36,14 @@ def _get_build(var, default=False):
 def _get_cython_raw_path():
     if sys.platform == "win32":
         appdata_path = os.environ.get("APPDATA")
-        python_executable = os.path.join(appdata_path, "uv", "python", "*3.9*", "python.exe")
+        python_executable = os.path.join(appdata_path, "uv", "python", f"*{_get_python_major_version()}*", "python.exe")
+        #python_executable = os.path.join(appdata_path, "uv", "python", "*3.9*", "python.exe")
     elif sys.platform == "darwin":
         appdata_path = os.path.expanduser("~/Library/Application Support")
-        python_executable = os.path.join(appdata_path, "uv", "python", "*3.9*", "bin", "python")
+        python_executable = os.path.join(appdata_path, "uv", "python", f"*{_get_python_major_version()}*", "bin", "python")
     elif sys.platform == "linux":
         appdata_path = os.path.expanduser("~/.config")
-        python_executable = os.path.join(appdata_path, "uv", "python", "*3.9*", "bin", "python")
+        python_executable = os.path.join(appdata_path, "uv", "python", f"*{_get_python_major_version()}*", "bin", "python")
     else:
         raise OSError("Unsupported operating system")
     matching_paths = glob.glob(python_executable)
@@ -51,6 +52,8 @@ def _get_cython_raw_path():
         return python_executable
     else:
         raise FileNotFoundError("Python executable not found in uv directory")
+def _get_python_major_version():
+    return f"{sys.version_info.major}.{sys.version_info.minor}"
 
 
 _BUILD_CPP_TEST = _get_build("BUILD_CPP_TEST", False)
