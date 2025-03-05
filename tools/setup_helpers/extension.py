@@ -1,7 +1,9 @@
 import distutils.sysconfig
 import os
+import sys
 import platform
 import subprocess
+import glob
 from pathlib import Path
 
 import torch
@@ -31,6 +33,24 @@ def _get_build(var, default=False):
     if val not in falses:
         print(f"WARNING: Unexpected environment variable value `{var}={val}`. " f"Expected one of {trues + falses}")
     return False
+def _get_cython_raw_path():
+    if sys.platform == "win32":
+        appdata_path = os.environ.get("APPDATA")
+        python_executable = os.path.join(appdata_path, "uv", "python", "*3.9*", "python.exe")
+    elif sys.platform == "darwin":
+        appdata_path = os.path.expanduser("~/Library/Application Support")
+        python_executable = os.path.join(appdata_path, "uv", "python", "*3.9*", "bin", "python")
+    elif sys.platform == "linux":
+        appdata_path = os.path.expanduser("~/.config")
+        python_executable = os.path.join(appdata_path, "uv", "python", "*3.9*", "bin", "python")
+    else:
+        raise OSError("Unsupported operating system")
+    matching_paths = glob.glob(python_executable)
+    if matching_paths:
+        python_executable = matching_paths[0]
+        return python_executable
+    else:
+        raise FileNotFoundError("Python executable not found in uv directory")
 
 
 _BUILD_CPP_TEST = _get_build("BUILD_CPP_TEST", False)
@@ -140,6 +160,11 @@ class CMakeBuild(build_ext):
             f"-DUSE_CUDA:BOOL={'ON' if _USE_CUDA else 'OFF'}",
             f"-DUSE_OPENMP:BOOL={'ON' if _USE_OPENMP else 'OFF'}",
             f"-DUSE_FFMPEG:BOOL={'ON' if _USE_FFMPEG else 'OFF'}",
+            f"-DPYTHON_EXECUTABLE={_get_cython_raw_path()}",
+            "-DUSE_CUDNN=1 ",
+            "-DUSE_CUSPARSELT=1 ",
+            "-DUSE_CUDSS=1 ",
+            "-DUSE_CUFILE=1 ",
         ]
         build_args = ["--target", "install"]
         # Pass CUDA architecture to cmake

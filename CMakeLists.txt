@@ -143,6 +143,7 @@ endif()
 if(USE_OPENMP)
   find_package(OpenMP REQUIRED)
 endif()
+find_package(Python3 3.9 COMPONENTS Interpreter Development REQUIRED)
 
 # TORCH_CXX_FLAGS contains the same -D_GLIBCXX_USE_CXX11_ABI value as PyTorch
 if (MSVC)

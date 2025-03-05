@@ -131,3 +131,6 @@ examples/tutorials/_assets
 # third parties
 third_party/install/
 third_party/archives/
+
+# record.txt
+record.txt
